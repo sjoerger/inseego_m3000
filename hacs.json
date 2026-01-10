@@ -1,3 +1,5 @@
 {
-  "name": "Inseego M3000 Hotspot"
+  "name": "Inseego M3000 Hotspot",
+  "content_in_root": false,
+  "homeassistant": "2024.1.0"
 }
