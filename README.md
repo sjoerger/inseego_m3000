@@ -1,46 +1,40 @@
 # Inseego M3000 Hotspot Integration for Home Assistant
 
-This custom integration allows you to monitor your Inseego M3000 portable hotspot in Home Assistant.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+[![GitHub Release][releases-shield]][releases]
+[![GitHub Activity][commits-shield]][commits]
+[![License][license-shield]](LICENSE)
+
+![Project Maintenance][maintenance-shield]
+
+A Home Assistant custom integration for monitoring Inseego M3000 portable hotspots.
 
 ## Features
 
-This integration provides comprehensive monitoring of your Inseego M3000 hotspot including:
+Monitor your Inseego M3000 hotspot with 24 sensors and 8 binary sensors including:
 
-### Sensors
-- **Signal Strength** - Signal bars (0-5) with network details
-- **Signal to Noise Ratio (SNR)** - SNR in dB
-- **Battery** - Battery percentage
-- **Network** - Current network provider
-- **Technology** - Current network technology (4G, 5G, 5G UWB, etc.)
-- **Connection State** - Connection status
-- **Data Received** - Total bytes received (session)
-- **Data Transmitted** - Total bytes transmitted (session)
-- **Total Data Usage** - Combined data usage (session)
-- **Connection Duration** - How long the current connection has been active
-- **Connected Clients** - Total number of connected devices
-- **WiFi Clients** - Number of WiFi clients
-- **Primary Clients** - Number of primary network clients
-- **IP Address** - Current public IP with gateway and subnet info
-- **SIM Status** - SIM card status
-- **GPS Status** - GPS fix status
-- **Current Billing Cycle Usage** - Total data used this billing period
-- **Current Cycle Download** - Download data this billing period
-- **Current Cycle Upload** - Upload data this billing period
-- **Data Allowance** - Monthly data allowance
-- **Data Remaining** - Remaining data allowance
-- **Data Allowance Remaining** - Percentage of allowance remaining
-- **Days Until Cycle Reset** - Days left in current billing cycle
-- **Billing Cycle End Date** - When the current billing cycle ends
+### 📡 Connection & Signal
+- Signal strength (bars and SNR)
+- Network provider and technology (4G/5G/5G UWB)
+- Connection state and duration
+- IP address information
 
-### Binary Sensors
-- **Connection** - Whether device is connected to network
-- **WiFi** - WiFi enabled status
-- **Mobile Data** - Mobile data enabled status
-- **Battery Charging** - Whether battery is charging
-- **Battery Present** - Battery detection status
-- **Ethernet** - Ethernet connection status
-- **Airplane Mode** - Airplane mode status
-- **Guest WiFi** - Guest WiFi enabled status
+### 📊 Data Usage
+**Session Data:**
+- Real-time data received/transmitted/total
+
+**Billing Cycle Data:**
+- Monthly usage tracking
+- Data allowance and remaining
+- Download/Upload breakdown
+- Days until cycle reset
+- Cycle end date
+
+### 🔋 Device Status
+- Battery percentage and charging status
+- WiFi, mobile data, and ethernet status
+- Connected clients count
+- SIM and GPS status
 
 ## Installation
 
@@ -50,44 +44,39 @@ This integration provides comprehensive monitoring of your Inseego M3000 hotspot
 2. Click on "Integrations"
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
-5. Add this repository URL and select "Integration" as the category
-6. Click "Install"
-7. Restart Home Assistant
+5. Add this repository URL: `https://github.com/sjoerger/inseego_m3000`
+6. Select "Integration" as the category
+7. Click "Add"
+8. Search for "Inseego M3000" in HACS
+9. Click "Download"
+10. Restart Home Assistant
+11. Add the integration via UI: Settings → Devices & Services → Add Integration → "Inseego M3000"
 
 ### Manual Installation
 
-1. Copy the `inseego_m3000` folder to your `config/custom_components/` directory
-2. Restart Home Assistant
+1. Download the `inseego_m3000` folder from this repository
+2. Copy it to your `<config>/custom_components/` directory
+3. Restart Home Assistant
+4. Add the integration via UI: Settings → Devices & Services → Add Integration → "Inseego M3000"
 
 ## Configuration
 
 1. Go to **Settings** → **Devices & Services**
 2. Click **+ Add Integration**
 3. Search for "Inseego M3000"
-4. Enter your device's IP address (typically 192.168.1.1 or similar)
+4. Enter your hotspot's IP address (usually `192.168.1.1`)
 5. Optionally adjust the update interval (default: 30 seconds)
 6. Click Submit
 
-## Finding Your Device IP
+## Documentation
 
-The default IP address for Inseego M3000 hotspots is usually:
-- **192.168.1.1** (when connected via WiFi)
-- Check your hotspot's display screen for the exact IP
-- Check your router/network settings for the device IP
+- [Installation Guide](custom_components/inseego_m3000/INSTALLATION.md)
+- [Dashboard Examples](custom_components/inseego_m3000/EXAMPLES.md)
+- [Changelog](custom_components/inseego_m3000/CHANGELOG.md)
 
-## Usage
+## Example Automations
 
-After configuration, all sensors and binary sensors will be automatically created under a single device. You can:
-
-- View all entities in the device page
-- Create automations based on signal strength, battery level, data usage, etc.
-- Add entities to your dashboard
-- Monitor network technology changes (4G → 5G transitions)
-- Track data usage over time with the statistics feature
-
-### Example Automations
-
-**Low Battery Alert:**
+### Low Battery Alert
 ```yaml
 automation:
   - alias: "Hotspot Low Battery"
@@ -98,41 +87,13 @@ automation:
     action:
       - service: notify.mobile_app
         data:
-          message: "Hotspot battery is low ({{ states('sensor.inseego_m3000_battery') }}%)"
+          message: "Hotspot battery is at {{ states('sensor.inseego_m3000_battery') }}%"
 ```
 
-**Poor Signal Warning:**
+### Data Usage Warning
 ```yaml
 automation:
-  - alias: "Hotspot Poor Signal"
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.inseego_m3000_signal_strength
-        below: 2
-    action:
-      - service: notify.mobile_app
-        data:
-          message: "Hotspot has poor signal ({{ states('sensor.inseego_m3000_signal_strength') }} bars)"
-```
-
-**High Data Usage Alert:**
-```yaml
-automation:
-  - alias: "Hotspot High Data Usage"
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.inseego_m3000_total_data_usage
-        above: 50000000000  # 50 GB in bytes
-    action:
-      - service: notify.mobile_app
-        data:
-          message: "Hotspot has used over 50GB of data"
-```
-
-**Billing Cycle Data Alert:**
-```yaml
-automation:
-  - alias: "Hotspot 80% Data Used"
+  - alias: "Data Usage Warning - 80%"
     trigger:
       - platform: numeric_state
         entity_id: sensor.inseego_m3000_data_allowance_remaining
@@ -140,60 +101,61 @@ automation:
     action:
       - service: notify.mobile_app
         data:
-          message: "Only {{ states('sensor.inseego_m3000_data_allowance_remaining') }}% of data allowance remaining!"
+          message: "Only {{ states('sensor.inseego_m3000_data_remaining') }} GB remaining!"
 ```
 
-**Billing Cycle Reset Reminder:**
-```yaml
-automation:
-  - alias: "Billing Cycle Ending Soon"
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.inseego_m3000_days_until_cycle_reset
-        below: 3
-    action:
-      - service: notify.mobile_app
-        data:
-          message: "Billing cycle ends in {{ states('sensor.inseego_m3000_days_until_cycle_reset') }} days"
-```
+## Screenshots
 
-## Troubleshooting
+### Device Page
+![Device Page](images/device_page.png)
 
-### Connection Issues
-- Ensure your Home Assistant instance can reach the hotspot's IP address
-- Check that the hotspot is powered on and functioning
-- Try pinging the IP address from your Home Assistant host
-- Verify you're using the correct IP address
+### Dashboard Example
+![Dashboard](images/dashboard.png)
 
-### Entities Not Updating
-- Check the update interval in the integration configuration
-- Review Home Assistant logs for errors
-- Ensure the hotspot firmware is up to date
+## Supported Devices
 
-### Missing Entities
-- Some entities may not appear if the hotspot doesn't provide that data
-- Different firmware versions may have slightly different API responses
+- Inseego M3000 (tested)
+- Potentially other Inseego hotspots with similar API (untested)
 
 ## API Information
 
-This integration uses the Inseego M3000's REST API endpoints:
-- **Status Endpoint:** `http://{device_ip}/status_data.json`
-- **Usage Endpoint:** `http://{device_ip}/getUsageInfo.json`
-- **Method:** GET
-- **Authentication:** None required (local network access)
-- **Update Method:** Polling (both endpoints)
+This integration uses the following REST API endpoints:
+- `http://{device_ip}/status_data.json` - Device and connection status
+- `http://{device_ip}/getUsageInfo.json` - Billing cycle data
+
+No authentication is required for local network access.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Issues
+
+If you encounter any issues, please [open an issue](https://github.com/sjoerger/inseego_m3000/issues) with:
+- Home Assistant version
+- Integration version
+- Relevant logs
+- Steps to reproduce
 
 ## Support
 
-For issues, feature requests, or questions:
-- Open an issue on GitHub
-- Check existing issues for solutions
-- Provide Home Assistant logs when reporting problems
-
-## Credits
-
-Developed for the Home Assistant community.
+- [Report a Bug](https://github.com/sjoerger/inseego_m3000/issues/new?template=bug_report.md)
+- [Request a Feature](https://github.com/sjoerger/inseego_m3000/issues/new?template=feature_request.md)
 
 ## License
 
-MIT License - See LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Thanks to the Home Assistant community
+- Inspired by the need for better hotspot monitoring
+
+---
+
+[commits-shield]: https://img.shields.io/github/commit-activity/y/sjoerger/inseego_m3000.svg
+[commits]: https://github.com/sjoerger/inseego_m3000/commits/main
+[license-shield]: https://img.shields.io/github/license/sjoerger/inseego_m3000.svg
+[maintenance-shield]: https://img.shields.io/badge/maintainer-sjoerger-blue.svg
+[releases-shield]: https://img.shields.io/github/release/sjoerger/inseego_m3000.svg
+[releases]: https://github.com/sjoerger/inseego_m3000/releases
