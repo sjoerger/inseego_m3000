@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2025-01-10
+- Fix URLs for hotspot status and info data. Should've double checked this to before starting
+- Removed redundant files
+
 ## [1.0.1] - 2025-01-10
 - Hopefully this fixes the HACS not showing any information about the integration
 - Other repo organization to make HACS validation work
