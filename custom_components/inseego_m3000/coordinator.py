@@ -36,8 +36,8 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self) -> dict:
         """Fetch data from the Inseego M3000."""
-        status_url = f"http://{self.host}/status_data.json"
-        usage_url = f"http://{self.host}/getUsageInfo.json"
+        status_url = f"http://{self.host}/srv/status"
+        usage_url = f"http://{self.host}/apps_home/usageinfo"
         
         try:
             # Fetch status data

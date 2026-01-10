@@ -30,7 +30,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 async def validate_connection(hass: HomeAssistant, host: str) -> dict[str, Any]:
     """Validate the connection to the Inseego M3000."""
     session = async_get_clientsession(hass)
-    url = f"http://{host}/status_data.json"
+    url = f"http://{host}/srv/status"
     
     try:
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)) as response:
