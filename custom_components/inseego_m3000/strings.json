@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Inseego M3000",
+        "description": "Enter the IP address or hostname of your Inseego M3000 hotspot",
+        "data": {
+          "host": "Host (IP address or hostname)",
+          "scan_interval": "Update interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the device. Check the IP address and ensure the device is powered on.",
+      "invalid_device": "The device at this address does not appear to be an Inseego M3000.",
+      "unknown": "Unexpected error occurred. Check the logs for details."
+    },
+    "abort": {
+      "already_configured": "This device is already configured"
+    }
+  }
+}

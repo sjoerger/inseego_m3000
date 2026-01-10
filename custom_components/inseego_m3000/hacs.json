@@ -1,0 +1,11 @@
+{
+  "name": "Inseego M3000 Hotspot",
+  "content_in_root": false,
+  "filename": "inseego_m3000",
+  "render_readme": true,
+  "domains": ["sensor", "binary_sensor"],
+  "iot_class": "Local Polling",
+  "homeassistant": "2024.1.0",
+  "zip_release": false,
+  "country": ["US"]
+}
