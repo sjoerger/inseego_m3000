@@ -120,8 +120,8 @@ automation:
 ## API Information
 
 This integration uses the following REST API endpoints:
-- `http://{device_ip}/status_data.json` - Device and connection status
-- `http://{device_ip}/getUsageInfo.json` - Billing cycle data
+- `http://{device_ip}/srv/status` - Device and connection status
+- `http://{device_ip}/apps_home/usageinfo` - Billing cycle data
 
 No authentication is required for local network access.
 
