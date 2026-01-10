@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2025-01-10
+- Hopefully this fixes the HACS not showing any information about the integration
+- Other repo organization to make HACS validation work
+- No code changes
+
 ## [1.0.0] - 2025-01-09
 
 ### Added
