@@ -1,9 +1,9 @@
 {
   "domain": "inseego_m3000",
   "name": "Inseego M3000 Hotspot",
-  "codeowners": ["@yourusername"],
+  "codeowners": ["@sjoerger"],
   "config_flow": true,
-  "documentation": "https://github.com/yourusername/inseego_m3000",
+  "documentation": "https://github.com/sjoerger/inseego_m3000",
   "integration_type": "device",
   "iot_class": "local_polling",
   "requirements": ["aiohttp>=3.8.0"],
