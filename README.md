@@ -13,6 +13,7 @@ A Home Assistant custom integration for monitoring Inseego M3000 portable hotspo
 
 Monitor your Inseego M3000 hotspot with 24 sensors and 8 binary sensors including:
 
+
 ### 📡 Connection & Signal
 - Signal strength (bars and SNR)
 - Network provider and technology (4G/5G/5G UWB)
@@ -104,7 +105,7 @@ automation:
 ## Screenshots
 
 ### Device Page
-![Device Page](images/device_page.png)
+![Device Page](<img width="1280" height="408" alt="inseego_m3000_device" src="https://github.com/user-attachments/assets/aa908577-f281-4e02-bdf2-d0b2d50ead27" />)
 
 ### Dashboard Example
 ![Dashboard](images/dashboard.png)
