@@ -105,7 +105,7 @@ automation:
 ## Screenshots
 
 ### Device Page
-![Device Page](<img width="1280" height="408" alt="inseego_m3000_device" src="https://github.com/user-attachments/assets/aa908577-f281-4e02-bdf2-d0b2d50ead27" />)
+![Device Page](https://github.com/user-attachments/assets/aa908577-f281-4e02-bdf2-d0b2d50ead27)
 
 ### Dashboard Example
 ![Dashboard](images/dashboard.png)
