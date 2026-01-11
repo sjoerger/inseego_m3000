@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.3] - 2025-01-11
+## [1.0.3] - 2025-01-XX - UNRELEASED
 - Updated README with missing images
 - Removed unneeded installation instructions
 - Added one click install with HACS link
