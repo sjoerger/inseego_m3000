@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2025-01-11
+- Updated README with missing images
+- Removed unneeded installation instructions
+- Added one click install with HACS link
+
 ## [1.0.2] - 2025-01-10
 - Fix URLs for hotspot status and info data. Should've double checked this to before starting
 - Removed redundant files
