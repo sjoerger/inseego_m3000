@@ -107,8 +107,9 @@ automation:
 ### Device Page
 ![Device Page](https://github.com/user-attachments/assets/aa908577-f281-4e02-bdf2-d0b2d50ead27)
 
-### Dashboard Example
-![Dashboard](images/dashboard.png)
+### Sensors Example
+![Sensors](https://github.com/user-attachments/assets/1d51724d-0574-4b26-8e9a-e96822755e21)
+
 
 ## Supported Devices
 
