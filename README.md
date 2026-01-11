@@ -40,24 +40,21 @@ Monitor your Inseego M3000 hotspot with 24 sensors and 8 binary sensors includin
 
 ### HACS (Recommended)
 
+One-click installation from HACS:
+
+[![Open your Home Assistant instance and open the Inseego M3000 integration inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sjoerger&repository=inseego_m3000&category=integration)
+
 1. Open HACS in Home Assistant
-2. Click on "Integrations"
-3. Click the three dots in the top right corner
-4. Select "Custom repositories"
-5. Add this repository URL: `https://github.com/sjoerger/inseego_m3000`
-6. Select "Integration" as the category
-7. Click "Add"
-8. Search for "Inseego M3000" in HACS
-9. Click "Download"
-10. Restart Home Assistant
-11. Add the integration via UI: Settings → Devices & Services → Add Integration → "Inseego M3000"
+2. Click the three dots in the top right corner
+3. Select "Custom repositories"
+4. Add this repository URL: `https://github.com/sjoerger/inseego_m3000`
+5. Select "Integration" as the category
+6. Click "Add"
+7. Search for "Inseego M3000" in HACS
+8. Click "Download"
+9. Restart Home Assistant
+10. Add the integration via UI: Settings → Devices & Services → Add Integration → "Inseego M3000"
 
-### Manual Installation
-
-1. Download the `inseego_m3000` folder from this repository
-2. Copy it to your `<config>/custom_components/` directory
-3. Restart Home Assistant
-4. Add the integration via UI: Settings → Devices & Services → Add Integration → "Inseego M3000"
 
 ## Configuration
 
@@ -70,9 +67,9 @@ Monitor your Inseego M3000 hotspot with 24 sensors and 8 binary sensors includin
 
 ## Documentation
 
-- [Installation Guide](custom_components/inseego_m3000/INSTALLATION.md)
-- [Dashboard Examples](custom_components/inseego_m3000/EXAMPLES.md)
-- [Changelog](custom_components/inseego_m3000/CHANGELOG.md)
+- [Installation Guide](INSTALLATION.md)
+- [Dashboard Examples](EXAMPLES.md)
+- [Changelog](CHANGELOG.md)
 
 ## Example Automations
 
