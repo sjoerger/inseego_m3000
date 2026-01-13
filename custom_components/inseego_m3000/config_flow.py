@@ -72,16 +72,25 @@ class InseegoM3000ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
+                # Validate connection first
                 device_info = await validate_connection(self.hass, user_input[CONF_HOST])
                 
                 # Create a unique ID based on the host
                 await self.async_set_unique_id(user_input[CONF_HOST])
+
+                # Check if already configured and abort if so
+                # This raises AbortFlow exception
                 self._abort_if_unique_id_configured()
 
+                # If we get here, not configured yet - create entry
                 return self.async_create_entry(
                     title=f"Inseego M3000 ({user_input[CONF_HOST]})",
                     data=user_input,
                 )
+            except AbortFlow:
+                # Re-raise - this is EXPECTED behavior
+                # UI shows "already_configured" message
+                raise
             except ConnectionError:
                 errors["base"] = "cannot_connect"
             except ValueError:
