@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 - Updated README with missing images
 - Removed unneeded installation instructions
 - Added one click install with HACS link
-- Diable specific sensor entities by default fixes #1
+- Diable specific sensor entities by default fixes [#1](https://github.com/sjoerger/inseego_m3000/issues/1)
 
 ## [1.0.2] - 2025-01-10
 - Fix URLs for hotspot status and info data. Should've double checked this to before starting
