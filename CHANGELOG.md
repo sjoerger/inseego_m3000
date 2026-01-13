@@ -3,13 +3,13 @@
 All notable changes to this project will be documented in this file.
 ## [1.0.4] - 2025-01-XX - UNRELEASED
 - Added local icon.png file
-- Fix unhandled exception not raising AbortFlow for duplicate devices [#4](https://github.com/sjoerger/inseego_m3000/issues/4)
+- Fix unhandled exception not raising AbortFlow for duplicate devices. Fixes [#4](https://github.com/sjoerger/inseego_m3000/issues/4)
 
 ## [1.0.3] - 2025-01-13
 - Updated README with missing images
 - Removed unneeded installation instructions
 - Added one click install with HACS link
-- Diable specific sensor entities by default fixes [#1](https://github.com/sjoerger/inseego_m3000/issues/1)
+- Disable specific sensor entities by default. Fixes [#1](https://github.com/sjoerger/inseego_m3000/issues/1)
 
 ## [1.0.2] - 2025-01-10
 - Fix URLs for hotspot status and info data. Should've double checked this to before starting
