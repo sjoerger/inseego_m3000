@@ -1,8 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.0.4] - 2025-01-XX - UNRELEASED
+- Added local icon.png file
+- Fix unhandled exception not raising AbortFlow for duplicate devices [#4](https://github.com/sjoerger/inseego_m3000/issues/4)
 
-## [1.0.3] - 2025-01-XX - UNRELEASED
+## [1.0.3] - 2025-01-13
 - Updated README with missing images
 - Removed unneeded installation instructions
 - Added one click install with HACS link
