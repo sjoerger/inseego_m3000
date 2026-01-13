@@ -274,12 +274,14 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         key="sim_status",
         name="SIM Status",
         icon="mdi:sim",
+        entity_registry_enabled_default=False,
         value_fn=lambda data: data.get("statusData", {}).get("statusBarSimStatus", "Unknown"),
     ),
     InseegoSensorEntityDescription(
         key="gps_status",
         name="GPS Status",
         icon="mdi:crosshairs-gps",
+        entity_registry_enabled_default=False,
         value_fn=lambda data: data.get("statusData", {}).get("statusBarGpsStatus", "Unknown"),
     ),
     # Usage data sensors
@@ -290,6 +292,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfInformation.GIGABYTES,
         state_class=SensorStateClass.TOTAL,
         suggested_display_precision=2,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: float(data.get("usageData", {}).get("lineUsage", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -299,6 +302,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfInformation.GIGABYTES,
         state_class=SensorStateClass.TOTAL,
         suggested_display_precision=2,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: float(data.get("usageData", {}).get("rxUsage", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -308,6 +312,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfInformation.GIGABYTES,
         state_class=SensorStateClass.TOTAL,
         suggested_display_precision=2,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: float(data.get("usageData", {}).get("txUsage", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -316,6 +321,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:database",
         native_unit_of_measurement=UnitOfInformation.GIGABYTES,
         suggested_display_precision=2,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: float(data.get("usageData", {}).get("allowance", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -325,6 +331,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfInformation.GIGABYTES,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: float(data.get("usageData", {}).get("remainingUsage", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -333,6 +340,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:percent",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: int(data.get("usageData", {}).get("barPercentageRemaining", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -341,6 +349,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:calendar-clock",
         native_unit_of_measurement=UnitOfTime.DAYS,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: int(data.get("usageData", {}).get("daysLeft", "0")),
     ),
     InseegoSensorEntityDescription(
@@ -348,6 +357,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         name="Billing Cycle End Date",
         icon="mdi:calendar-end",
         device_class=SensorDeviceClass.DATE,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: data.get("usageData", {}).get("cycleEndDt", "Unknown").replace("&#x2F;", "/"),
     ),
 )
