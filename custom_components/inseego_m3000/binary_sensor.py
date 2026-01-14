@@ -90,14 +90,14 @@ BINARY_SENSOR_TYPES: tuple[InseegoBinarySensorEntityDescription, ...] = (
     ),
     InseegoBinarySensorEntityDescription(
         key="wifi",
-        name="WiFi",
+        name="WiFi Connected",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         icon="mdi:wifi",
         value_fn=is_wifi_enabled,
     ),
     InseegoBinarySensorEntityDescription(
         key="mobile_data",
-        name="Mobile Data",
+        name="Mobile Data Enabled",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         icon="mdi:signal",
         value_fn=is_mobile_data_enabled,
@@ -117,7 +117,7 @@ BINARY_SENSOR_TYPES: tuple[InseegoBinarySensorEntityDescription, ...] = (
     ),
     InseegoBinarySensorEntityDescription(
         key="ethernet",
-        name="Ethernet",
+        name="Ethernet Connected",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         icon="mdi:ethernet",
         value_fn=is_ethernet_connected,
@@ -130,7 +130,7 @@ BINARY_SENSOR_TYPES: tuple[InseegoBinarySensorEntityDescription, ...] = (
     ),
     InseegoBinarySensorEntityDescription(
         key="guest_wifi",
-        name="Guest WiFi",
+        name="Guest WiFi Enabled",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         icon="mdi:wifi-star",
         value_fn=is_guest_wifi_enabled,
