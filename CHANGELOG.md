@@ -1,28 +1,33 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [1.0.4] - 2025-01-XX - UNRELEASED
+## [1.0.6] - 2026-01-XX - UNRELEASED
+
+## [1.0.5] - 2026-01-13
+- Bug fix missing function import [#8](https://github.com/sjoerger/inseego_m3000/issues/8)
+
+## [1.0.4] - 2026-01-13
 - Added local icon.png file
 - Fix unhandled exception not raising AbortFlow for duplicate devices. Fixes [#4](https://github.com/sjoerger/inseego_m3000/issues/4)
 - Updated several sensors to be categorized as diagnostic entities. Resolves [#6](https://github.com/sjoerger/inseego_m3000/issues/6)
 - Updated a few binary sensor names
 
-## [1.0.3] - 2025-01-13
+## [1.0.3] - 2026-01-13
 - Updated README with missing images
 - Removed unneeded installation instructions
 - Added one click install with HACS link
 - Disable specific sensor entities by default. Fixes [#1](https://github.com/sjoerger/inseego_m3000/issues/1)
 
-## [1.0.2] - 2025-01-10
+## [1.0.2] - 2026-01-10
 - Fix URLs for hotspot status and info data. Should've double checked this to before starting
 - Removed redundant files
 
-## [1.0.1] - 2025-01-10
+## [1.0.1] - 2026-01-10
 - Hopefully this fixes the HACS not showing any information about the integration
 - Other repo organization to make HACS validation work
 - No code changes
 
-## [1.0.0] - 2025-01-09
+## [1.0.0] - 2026-01-09
 
 ### Added
 - Initial release of Inseego M3000 Hotspot integration
