@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [1.0.4] - 2025-01-XX - UNRELEASED
 - Added local icon.png file
 - Fix unhandled exception not raising AbortFlow for duplicate devices. Fixes [#4](https://github.com/sjoerger/inseego_m3000/issues/4)
+- Updated several sensors to be categorized as diagnostic entities. Resolves [#6](https://github.com/sjoerger/inseego_m3000/issues/6)
+- Updated a few binary sensor names
 
 ## [1.0.3] - 2025-01-13
 - Updated README with missing images
