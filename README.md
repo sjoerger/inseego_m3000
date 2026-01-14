@@ -126,17 +126,11 @@ No authentication is required for local network access.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a [Pull Request](https://github.com/sjoerger/inseego_m3000/pulls).
 
-## Issues
+## Issues / Support
 
-If you encounter any issues, please [open an issue](https://github.com/sjoerger/inseego_m3000/issues) with:
-- Home Assistant version
-- Integration version
-- Relevant logs
-- Steps to reproduce
-
-## Support
+If you encounter any issues, please:
 
 - [Report a Bug](https://github.com/sjoerger/inseego_m3000/issues/new?template=bug_report.md)
 - [Request a Feature](https://github.com/sjoerger/inseego_m3000/issues/new?template=feature_request.md)
