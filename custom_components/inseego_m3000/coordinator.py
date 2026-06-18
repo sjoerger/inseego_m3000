@@ -247,11 +247,11 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             device_info_data = {}
             account_info_data = {}
             if self._has_auth:
-                for key, path, target in (
-                    ("cellular", "/rest/1.0/CellularServiceStatus", None),
-                    ("battery",  "/rest/1.0/BatteryStatus",         None),
-                    ("device",   "/rest/1.0/DeviceInfo",            None),
-                    ("account",  "/rest/1.0/AccountInfo",           None),
+                for key, path in (
+                    ("cellular", "/rest/1.0/CellularServiceStatus"),
+                    ("battery",  "/rest/1.0/BatteryStatus"),
+                    ("device",   "/rest/1.0/DeviceInfo"),
+                    ("account",  "/rest/1.0/AccountInfo"),
                 ):
                     try:
                         result = await self._rest_get(path)
@@ -265,6 +265,16 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                             account_info_data = result
                     except Exception as err:
                         _LOGGER.debug("%s REST fetch failed: %s", key, err)
+
+            # Cellular fallback: populate band/technology from statusData when REST unavailable
+            if not cellular_status_data:
+                sd = status_data.get("statusData", {})
+                cellular_status_data = {
+                    "CurrentBand": sd.get("statusBarBand", "").strip() or None,
+                    "CurrentWirelessTechnology": sd.get("statusBarTechnology") or None,
+                    "Current5GBandwidth": sd.get("statusBarBandwidth", "").strip() or None,
+                    "PCI": sd.get("statusBarPCI") or None,
+                }
 
             # Fetch GPS data with fallback chain
             gps_data = await self._fetch_gps_data()

@@ -14,6 +14,9 @@ Sourced from `/gps/status/` (authenticated) with fallback to `/gps/` and `/srv/g
 
 All GPS sensors are in the diagnostic category and require a GPS fix to report values.
 
+### Cellular status fallback
+When the REST API is unavailable (no password configured, or auth failure), the Active Band, Technology, 5G Bandwidth, and PCI sensors now fall back to the coarser values from the unauthenticated `/srv/status` endpoint rather than showing Unknown.
+
 ## [1.0.7] - 2026-06-18
 
 ### Authentication
