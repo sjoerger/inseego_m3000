@@ -27,8 +27,20 @@ class InseegoSwitchEntityDescription(SwitchEntityDescription):
 
 
 def _ack_ok(result: dict) -> bool:
-    """Return True if the device acknowledged the command successfully."""
-    return bool(result.get("success", result.get("status") == 200))
+    """Return True if the device acknowledged the command successfully.
+
+    Different endpoints return different shapes:
+    - {"success": true/1}
+    - {"status": 200}
+    - Full page-state blob with "errorCount": 0 (e.g. GPS endpoints)
+    """
+    if result.get("success"):
+        return True
+    if result.get("status") == 200:
+        return True
+    if "errorCount" in result and result["errorCount"] == 0:
+        return True
+    return False
 
 
 SWITCH_TYPES: tuple[InseegoSwitchEntityDescription, ...] = (
