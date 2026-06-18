@@ -148,21 +148,19 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
     # -------------------------------------------------------------------------
 
     async def _rest_get(self, path: str) -> dict:
-        """GET a REST endpoint, re-authenticating once on 401."""
+        """GET a REST endpoint, re-authenticating once on session expiry (401)."""
         await self._ensure_authenticated()
         url = f"http://{self.host}{path}"
         async with self._auth_session.get(
             url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
         ) as resp:
             if resp.status == 401:
-                _LOGGER.debug("Session expired, re-authenticating")
+                # Mark session expired; next poll will re-authenticate fresh
                 self._authenticated = False
-                await self._ensure_authenticated()
-                async with self._auth_session.get(
-                    url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
-                ) as resp2:
-                    resp2.raise_for_status()
-                    return await resp2.json(content_type=None)
+                _LOGGER.debug("Session expired on %s — will re-authenticate next poll", path)
+                raise aiohttp.ClientResponseError(
+                    resp.request_info, resp.history, status=401
+                )
             resp.raise_for_status()
             return await resp.json(content_type=None)
 

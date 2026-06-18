@@ -466,15 +466,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         name="Battery Charging Source",
         icon="mdi:power-plug",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: data.get("batteryStatusData", {}).get("ChargingSource"),
-    ),
-    InseegoSensorEntityDescription(
-        key="battery_health",
-        name="Battery Health",
-        icon="mdi:battery-heart",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("batteryStatusData", {}).get("BatteryHealth"),
+        value_fn=lambda data: data.get("batteryStatusData", {}).get("BatteryChargingSource"),
     ),
 
 )
