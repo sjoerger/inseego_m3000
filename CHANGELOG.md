@@ -1,59 +1,47 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [1.0.8] - 2026-06-18
-
-### New sensors — GPS location
-Sourced from `/gps/status/` (authenticated) with fallback to `/gps/` and `/srv/gps`:
-- GPS Latitude (°) — disabled by default
-- GPS Longitude (°) — disabled by default
-- GPS Accuracy (m) — disabled by default
-- GPS Altitude (m) — disabled by default
-- GPS Heading (°) — disabled by default
-- GPS Satellites — disabled by default
-
-All GPS sensors are in the diagnostic category and require a GPS fix to report values.
-
-### Cellular status fallback
-When the REST API is unavailable (no password configured, or auth failure), the Active Band, Technology, 5G Bandwidth, and PCI sensors now fall back to the coarser values from the unauthenticated `/srv/status` endpoint rather than showing Unknown.
-
-## [1.0.7] - 2026-06-18
+## [1.5.0] - 2026-06-18
 
 ### Authentication
-- Added optional admin password field to the setup flow
-- Implements the M3000 bcrypt login flow (pure Python, no FFI dependency) to establish an authenticated session
-- Without a password the integration behaves exactly as before; with a password the REST API sensors are unlocked
+Optional admin password in the setup flow unlocks the device REST API. Implements the M3000 bcrypt login flow in pure Python (no native library dependency). Without a password the integration works exactly as before.
 
-### New sensors (requires password)
-**Cellular signal (from `/rest/1.0/CellularServiceStatus`):**
-- Signal Strength (RSRP, dBm)
-- Signal Quality (RSRQ, dB) — disabled by default
-- Signal to Noise (SINR, dB) — disabled by default
+### New sensors — authenticated (requires password)
+
+**Cellular signal detail (from `/rest/1.0/CellularServiceStatus`):**
+- Signal Strength RSRP (dBm)
+- Signal Quality RSRQ (dB) — disabled by default
+- Signal to Noise SINR (dB) — disabled by default
 - Active Band (e.g. n25, n41)
 - Roaming State
 - 5G Bandwidth (MHz) — disabled by default
 - Cell ID — disabled by default
-- Physical Cell ID (PCI) — disabled by default
+- Physical Cell ID PCI — disabled by default
 
 **Battery (from `/rest/1.0/BatteryStatus`):**
 - Battery Charging Source (e.g. WallCharger)
 
 **Device identity (from `/rest/1.0/DeviceInfo` and `/rest/1.0/AccountInfo`):**
-- IMEI, MAC Address, ICCID, MDN — all disabled by default
-- Hardware Version, Modem Firmware, Web UI Version — all disabled by default
+- IMEI, MAC Address, ICCID, MDN — disabled by default
+- Hardware Version, Modem Firmware, Web UI Version — disabled by default
+
+### New sensors — GPS location
+
+Sourced from `/gps/status/` (authenticated) with automatic fallback to `/gps/` then `/srv/gps` for older firmware. All disabled by default, diagnostic category, require a GPS fix:
+- Latitude (°), Longitude (°)
+- Altitude (ft), Heading (°)
+- Accuracy (m), Satellites
 
 ### New binary sensor
-- WAN Connected — true internet connectivity check combining cellular connection state AND presence of a WAN IP address; distinct from the existing Connection sensor
+- WAN Connected — true internet connectivity check: cellular connection state AND a WAN IP assigned; distinct from the existing Connection sensor
 
 ### Reliability improvements
-- Lockout detection now logs at WARNING level with an actionable message
-- Timeout errors and connection refused errors now produce distinct log messages
+- Device lockout detection: requests redirected to `401lockedout.html` now raise a clear error instead of silently failing
+- Active Band, Technology, 5G Bandwidth, and PCI fall back to `/srv/status` values when the REST API is unavailable, instead of showing Unknown
+- Timeout and connection-refused errors produce distinct log messages
 - Raw response body logged on JSON parse failure to aid diagnosis
 - Fixed blocking event loop warning on newer HA versions (Python 3.14)
 - Session expiry handled gracefully — REST sensors miss one poll then recover automatically
-
-## [1.0.6] - 2026-06-18
-- Detect device lockout: if the hotspot redirects requests to `401lockedout.html` (triggered by too many bad password attempts), the integration now raises a clear error instead of silently failing
 
 ## [1.0.5] - 2026-01-13
 - Bug fix missing function import [#8](https://github.com/sjoerger/inseego_m3000/issues/8)
