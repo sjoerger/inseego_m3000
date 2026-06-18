@@ -6,6 +6,7 @@
         "description": "Enter the IP address or hostname of your Inseego M3000 hotspot",
         "data": {
           "host": "Host (IP address or hostname)",
+          "password": "Admin password (optional — enables REST API sensors)",
           "scan_interval": "Update interval (seconds)"
         }
       }
@@ -13,6 +14,7 @@
     "error": {
       "cannot_connect": "Failed to connect to the device. Check the IP address and ensure the device is powered on.",
       "invalid_device": "The device at this address does not appear to be an Inseego M3000.",
+      "invalid_auth": "Invalid password. Check the admin password and try again.",
       "unknown": "Unexpected error occurred. Check the logs for details."
     },
     "abort": {

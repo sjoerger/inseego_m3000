@@ -382,6 +382,101 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         value_fn=get_primary_clients,
     ),
 
+    # ==========================================
+    # REST API SENSORS (authenticated — requires password in config)
+    # ==========================================
+
+    # /rest/1.0/CellularServiceStatus
+    InseegoSensorEntityDescription(
+        key="rsrp",
+        name="Signal Strength (RSRP)",
+        icon="mdi:signal",
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        native_unit_of_measurement="dBm",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentSignalStrengthInRSRP"),
+    ),
+    InseegoSensorEntityDescription(
+        key="rsrq",
+        name="Signal Quality (RSRQ)",
+        icon="mdi:signal-variant",
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentStrengthInRSRQ"),
+    ),
+    InseegoSensorEntityDescription(
+        key="sinr",
+        name="Signal to Noise (SINR)",
+        icon="mdi:signal-variant",
+        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentSignalToNoiseLevelInSINR"),
+    ),
+    InseegoSensorEntityDescription(
+        key="active_band",
+        name="Active Band",
+        icon="mdi:radio-tower",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentBand"),
+    ),
+    InseegoSensorEntityDescription(
+        key="roaming_state",
+        name="Roaming State",
+        icon="mdi:map-marker-radius",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentRoamingState"),
+    ),
+    InseegoSensorEntityDescription(
+        key="bandwidth_5g",
+        name="5G Bandwidth",
+        icon="mdi:speedometer",
+        native_unit_of_measurement="MHz",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("Current5GBandwidth"),
+    ),
+    InseegoSensorEntityDescription(
+        key="cell_id",
+        name="Cell ID",
+        icon="mdi:antenna",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentCellID"),
+    ),
+    InseegoSensorEntityDescription(
+        key="pci",
+        name="Physical Cell ID (PCI)",
+        icon="mdi:antenna",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("cellularStatusData", {}).get("PCI"),
+    ),
+
+    # /rest/1.0/BatteryStatus
+    InseegoSensorEntityDescription(
+        key="battery_charging_source",
+        name="Battery Charging Source",
+        icon="mdi:power-plug",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data.get("batteryStatusData", {}).get("ChargingSource"),
+    ),
+    InseegoSensorEntityDescription(
+        key="battery_health",
+        name="Battery Health",
+        icon="mdi:battery-heart",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("batteryStatusData", {}).get("BatteryHealth"),
+    ),
+
 )
 
 async def async_setup_entry(

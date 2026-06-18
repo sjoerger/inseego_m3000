@@ -1,13 +1,16 @@
 """DataUpdateCoordinator for Inseego M3000."""
 from __future__ import annotations
 
-from datetime import timedelta
+import base64
 import logging
+import re
+from datetime import timedelta
 
 import aiohttp
+import bcrypt
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -16,6 +19,24 @@ from .const import DEFAULT_SCAN_INTERVAL, DEFAULT_TIMEOUT, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+# Bcrypt uses the same bit layout as standard base64 but a different alphabet.
+# Translating after standard base64 encode produces an identical result to the
+# FFI encode_base64() call the library uses.
+_STD_B64    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+_BCRYPT_B64 = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+_B64_TRANS  = str.maketrans(_STD_B64, _BCRYPT_B64)
+
+
+def _build_bcrypt_salt(token: str) -> bytes:
+    """Build the bcrypt salt from the device login token."""
+    encoded = base64.b64encode(token[:16].encode()).decode().rstrip("=").translate(_B64_TRANS)
+    return f"$2a$10${encoded}".encode()
+
+
+def _hash_password(password: str, salt: bytes) -> bytes:
+    """Hash password with bcrypt (CPU-bound — run in executor)."""
+    return bcrypt.hashpw(password.encode(), salt)
+
 
 class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching Inseego M3000 data."""
@@ -23,10 +44,16 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize."""
         self.host = entry.data[CONF_HOST]
+        self._password: str | None = entry.data.get(CONF_PASSWORD)
+        self._auth_session: aiohttp.ClientSession | None = None
+        self._action_token: str | None = None
+        self._authenticated = False
+
+        # Shared HA session for unauthenticated endpoints
         self.session = async_get_clientsession(hass)
-        
+
         scan_interval = entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-        
+
         super().__init__(
             hass,
             _LOGGER,
@@ -34,13 +61,122 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=scan_interval),
         )
 
+    @property
+    def _has_auth(self) -> bool:
+        return bool(self._password)
+
+    async def close(self) -> None:
+        """Close the authenticated session on integration unload."""
+        if self._auth_session:
+            await self._auth_session.close()
+            self._auth_session = None
+
+    # -------------------------------------------------------------------------
+    # Authentication
+    # -------------------------------------------------------------------------
+
+    async def _ensure_authenticated(self) -> None:
+        if not self._authenticated or self._auth_session is None:
+            await self._authenticate()
+
+    async def _authenticate(self) -> None:
+        """Run the full bcrypt login flow."""
+        if self._auth_session:
+            await self._auth_session.close()
+        # Must use a real cookie jar — HA's shared session uses DummyCookieJar
+        self._auth_session = aiohttp.ClientSession(
+            cookie_jar=aiohttp.CookieJar(unsafe=True)
+        )
+        try:
+            token = await self._get_login_token()
+            salt = _build_bcrypt_salt(token)
+            password_hash = await self.hass.async_add_executor_job(
+                _hash_password, self._password, salt
+            )
+            await self._submit_login(token, password_hash)
+            self._action_token = await self._get_action_token()
+            self._authenticated = True
+            _LOGGER.debug("Authentication successful")
+        except Exception:
+            self._authenticated = False
+            raise
+
+    async def _get_login_token(self) -> str:
+        """Extract gSecureToken from the device login page HTML."""
+        url = f"http://{self.host}/login"
+        async with self._auth_session.get(
+            url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+        ) as resp:
+            if "401lockedout" in str(resp.url):
+                raise UpdateFailed("Device is locked out — wait for lockout to expire or reboot")
+            html = await resp.text()
+
+        match = re.search(r'<input[^>]+id="gSecureToken"[^>]+value="([^"]+)"', html)
+        if not match:
+            match = re.search(r'<input[^>]+value="([^"]+)"[^>]+id="gSecureToken"', html)
+        if not match:
+            raise UpdateFailed("Login token not found on device login page")
+        return match.group(1)
+
+    async def _submit_login(self, token: str, password_hash: bytes) -> None:
+        """POST credentials to the device."""
+        url = f"http://{self.host}/submitLogin/"
+        async with self._auth_session.post(
+            url,
+            data={"shaPassword": password_hash.decode(), "gSecureToken": token},
+            timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT),
+        ) as resp:
+            if resp.status != 200:
+                raise UpdateFailed(f"Login failed: HTTP {resp.status} — check password")
+
+    async def _get_action_token(self) -> str | None:
+        """Fetch gSecureToken from usageinfo for future control operations."""
+        url = f"http://{self.host}/apps_home/usageinfo"
+        async with self._auth_session.get(
+            url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+        ) as resp:
+            if "401lockedout" in str(resp.url) or resp.status != 200:
+                return None
+            try:
+                data = await resp.json(content_type=None)
+                return data.get("gSecureToken")
+            except Exception:
+                return None
+
+    # -------------------------------------------------------------------------
+    # Authenticated REST helper
+    # -------------------------------------------------------------------------
+
+    async def _rest_get(self, path: str) -> dict:
+        """GET a REST endpoint, re-authenticating once on 401."""
+        await self._ensure_authenticated()
+        url = f"http://{self.host}{path}"
+        async with self._auth_session.get(
+            url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+        ) as resp:
+            if resp.status == 401:
+                _LOGGER.debug("Session expired, re-authenticating")
+                self._authenticated = False
+                await self._ensure_authenticated()
+                async with self._auth_session.get(
+                    url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+                ) as resp2:
+                    resp2.raise_for_status()
+                    return await resp2.json(content_type=None)
+            resp.raise_for_status()
+            return await resp.json(content_type=None)
+
+    # -------------------------------------------------------------------------
+    # Data fetch
+    # -------------------------------------------------------------------------
+
     async def _async_update_data(self) -> dict:
         """Fetch data from the Inseego M3000."""
         status_url = f"http://{self.host}/srv/status"
         usage_url = f"http://{self.host}/apps_home/usageinfo"
-        
+
         try:
-            # Fetch status data
+            # Fetch status data (unauthenticated)
             async with self.session.get(
                 status_url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
             ) as response:
@@ -57,7 +193,7 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                 if "statusData" not in status_data:
                     raise UpdateFailed("Invalid status response format")
 
-            # Fetch usage data
+            # Fetch usage data (unauthenticated)
             usage_data = {}
             try:
                 async with self.session.get(
@@ -68,12 +204,28 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             except Exception as err:
                 _LOGGER.debug("Usage data not available: %s", err)
 
-            # Combine all datasets
+            # Fetch REST data (authenticated, skipped if no password configured)
+            cellular_status_data = {}
+            battery_status_data = {}
+            if self._has_auth:
+                try:
+                    cellular_status_data = await self._rest_get("/rest/1.0/CellularServiceStatus")
+                except Exception as err:
+                    _LOGGER.debug("Cellular REST status: %s", err)
+                try:
+                    battery_status_data = await self._rest_get("/rest/1.0/BatteryStatus")
+                except Exception as err:
+                    _LOGGER.debug("Battery REST status: %s", err)
+
             return {
                 **status_data,
                 "usageData": usage_data,
+                "cellularStatusData": cellular_status_data,
+                "batteryStatusData": battery_status_data,
             }
-                
+
+        except UpdateFailed:
+            raise
         except TimeoutError:
             raise UpdateFailed(f"Timeout connecting to {self.host}")
         except aiohttp.ClientError as err:
