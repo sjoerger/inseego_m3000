@@ -1,7 +1,8 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [1.0.6] - 2026-01-XX - UNRELEASED
+## [1.0.6] - 2026-06-18
+- Detect device lockout: if the hotspot redirects requests to `401lockedout.html` (triggered by too many bad password attempts), the integration now raises a clear error instead of silently failing
 
 ## [1.0.5] - 2026-01-13
 - Bug fix missing function import [#8](https://github.com/sjoerger/inseego_m3000/issues/8)

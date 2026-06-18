@@ -111,6 +111,10 @@ automation:
 ![Sensors](https://github.com/user-attachments/assets/1d51724d-0574-4b26-8e9a-e96822755e21)
 
 
+## Device Lockout
+
+The M3000 will lock out all HTTP access (redirecting to `401lockedout.html`) after too many failed password attempts. This integration only reads data from the device and does not send passwords, so it will not trigger a lockout. If a lockout does occur (e.g. from another tool or browser), the integration will surface a clear error message rather than failing silently. The lockout clears on its own after a timeout or on device reboot.
+
 ## Supported Devices
 
 - Inseego M3000 (tested)

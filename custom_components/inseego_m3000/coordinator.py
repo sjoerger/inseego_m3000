@@ -44,22 +44,27 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             async with self.session.get(
                 status_url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
             ) as response:
+                if "401lockedout" in str(response.url):
+                    raise UpdateFailed(
+                        "Device is locked out — wait for lockout to expire or reboot the device"
+                    )
                 if response.status != 200:
                     raise UpdateFailed(f"HTTP {response.status}")
-                
-                status_data = await response.json()
-                
+                try:
+                    status_data = await response.json(content_type=None)
+                except (ValueError, aiohttp.ContentTypeError) as err:
+                    raise UpdateFailed(f"Unexpected response format from device: {err}")
                 if "statusData" not in status_data:
                     raise UpdateFailed("Invalid status response format")
-            
+
             # Fetch usage data
             usage_data = {}
             try:
                 async with self.session.get(
                     usage_url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
                 ) as response:
-                    if response.status == 200:
-                        usage_data = await response.json()
+                    if response.status == 200 and "401lockedout" not in str(response.url):
+                        usage_data = await response.json(content_type=None)
             except Exception as err:
                 _LOGGER.debug("Usage data not available: %s", err)
             
@@ -69,6 +74,8 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                 "usageData": usage_data
             }
                 
+        except TimeoutError:
+            raise UpdateFailed(f"Timeout connecting to {self.host}")
         except aiohttp.ClientError as err:
             raise UpdateFailed(f"Error communicating with device: {err}")
         except Exception as err:
