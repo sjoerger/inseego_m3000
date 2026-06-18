@@ -173,21 +173,21 @@ def _gps_get(gps: dict, *keys):
 
 
 def _parse_gps_altitude(data: dict) -> float | None:
-    """Return altitude in metres, handling device-reported strings like '195 ft'."""
+    """Return altitude in feet, handling device-reported strings like '195 ft'."""
     raw = _gps_get(data.get("gpsData", {}), "Altitude", "altitude", "gpsStatusAltitude")
     if raw is None:
         return None
     if isinstance(raw, (int, float)):
-        return float(raw)
+        return round(float(raw) * 3.28084, 1)
     s = str(raw).strip()
     if s.lower().endswith(" ft"):
         try:
-            return round(float(s[:-3].strip()) * 0.3048, 1)
+            return float(s[:-3].strip())
         except (ValueError, TypeError):
             return None
     s = s.rstrip(" m").strip()
     try:
-        return float(s)
+        return round(float(s) * 3.28084, 1)
     except (ValueError, TypeError):
         return None
 
@@ -626,7 +626,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         key="gps_altitude",
         name="GPS Altitude",
         icon="mdi:elevation-rise",
-        native_unit_of_measurement="m",
+        native_unit_of_measurement="ft",
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=1,
         entity_category=EntityCategory.DIAGNOSTIC,
