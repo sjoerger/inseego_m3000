@@ -172,6 +172,24 @@ def _gps_get(gps: dict, *keys):
     return None
 
 
+def _gps_float(data: dict, *keys) -> float | None:
+    """Return a GPS field as float, stripping any unit suffix the device may include."""
+    raw = _gps_get(data.get("gpsData", {}), *keys)
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = str(raw).strip()
+    for suffix in (" ft", " m", " °", "°", " deg"):
+        if s.lower().endswith(suffix):
+            s = s[: -len(suffix)].strip()
+            break
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return None
+
+
 def _parse_gps_altitude(data: dict) -> float | None:
     """Return altitude in feet, handling device-reported strings like '195 ft'."""
     raw = _gps_get(data.get("gpsData", {}), "Altitude", "altitude", "gpsStatusAltitude")
@@ -188,20 +206,6 @@ def _parse_gps_altitude(data: dict) -> float | None:
     s = s.rstrip(" m").strip()
     try:
         return round(float(s) * 3.28084, 1)
-    except (ValueError, TypeError):
-        return None
-
-
-def _parse_gps_heading(data: dict) -> float | None:
-    """Return heading in degrees, stripping any unit suffix."""
-    raw = _gps_get(data.get("gpsData", {}), "Heading", "heading", "gpsStatusHeading")
-    if raw is None:
-        return None
-    if isinstance(raw, (int, float)):
-        return float(raw)
-    s = str(raw).strip().rstrip("°").rstrip(" deg").strip()
-    try:
-        return float(s)
     except (ValueError, TypeError):
         return None
 
@@ -585,8 +589,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         suggested_display_precision=6,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
-            "Latitude", "latitude", "gpsStatusLatitude", "lat"),
+        value_fn=lambda data: _gps_float(data, "Latitude", "latitude", "gpsStatusLatitude", "lat"),
     ),
     InseegoSensorEntityDescription(
         key="gps_longitude",
@@ -597,8 +600,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         suggested_display_precision=6,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
-            "Longitude", "longitude", "gpsStatusLongitude", "lon"),
+        value_fn=lambda data: _gps_float(data, "Longitude", "longitude", "gpsStatusLongitude", "lon"),
     ),
     InseegoSensorEntityDescription(
         key="gps_accuracy",
@@ -609,8 +611,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         suggested_display_precision=1,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
-            "Accuracy", "accuracy", "gpsStatusUncertainty", "gpsStatusAccuracy"),
+        value_fn=lambda data: _gps_float(data, "Accuracy", "accuracy", "gpsStatusUncertainty", "gpsStatusAccuracy"),
     ),
     InseegoSensorEntityDescription(
         key="gps_satellites",
@@ -619,8 +620,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
-            "Satellites", "satellites", "gpsStatusSatelliteCount", "satellite_count"),
+        value_fn=lambda data: _gps_float(data, "Satellites", "satellites", "gpsStatusSatelliteCount", "satellite_count"),
     ),
     InseegoSensorEntityDescription(
         key="gps_altitude",
@@ -642,7 +642,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         suggested_display_precision=1,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=_parse_gps_heading,
+        value_fn=lambda data: _gps_float(data, "Heading", "heading", "gpsStatusHeading"),
     ),
 
 )
