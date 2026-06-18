@@ -163,6 +163,21 @@ def get_ip_attributes(data: dict) -> dict:
     }
 
 
+def _to_float(value) -> float | None:
+    """Convert a value to float, stripping any trailing unit suffix (e.g. '20 MHz', '-95 dBm')."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    s = str(value).strip()
+    # Strip everything after the first space (unit suffix)
+    s = s.split()[0] if s else s
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return None
+
+
 def _gps_get(gps: dict, *keys):
     """Return first non-None value from gps dict across multiple field name candidates."""
     for k in keys:
@@ -503,7 +518,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         native_unit_of_measurement="dBm",
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentSignalStrengthInRSRP"),
+        value_fn=lambda data: _to_float(data.get("cellularStatusData", {}).get("CurrentSignalStrengthInRSRP")),
     ),
     InseegoSensorEntityDescription(
         key="rsrq",
@@ -514,7 +529,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentStrengthInRSRQ"),
+        value_fn=lambda data: _to_float(data.get("cellularStatusData", {}).get("CurrentStrengthInRSRQ")),
     ),
     InseegoSensorEntityDescription(
         key="sinr",
@@ -525,7 +540,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentSignalToNoiseLevelInSINR"),
+        value_fn=lambda data: _to_float(data.get("cellularStatusData", {}).get("CurrentSignalToNoiseLevelInSINR")),
     ),
     InseegoSensorEntityDescription(
         key="active_band",
@@ -549,7 +564,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("cellularStatusData", {}).get("Current5GBandwidth"),
+        value_fn=lambda data: _to_float(data.get("cellularStatusData", {}).get("Current5GBandwidth")),
     ),
     InseegoSensorEntityDescription(
         key="cell_id",
@@ -557,7 +572,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:antenna",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentCellID"),
+        value_fn=lambda data: _to_float(data.get("cellularStatusData", {}).get("CurrentCellID")),
     ),
     InseegoSensorEntityDescription(
         key="pci",
@@ -565,7 +580,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:antenna",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("cellularStatusData", {}).get("PCI"),
+        value_fn=lambda data: _to_float(data.get("cellularStatusData", {}).get("PCI")),
     ),
 
     # /rest/1.0/BatteryStatus
