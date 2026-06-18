@@ -383,6 +383,57 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
     ),
 
     # ==========================================
+    # DEVICE IDENTITY SENSORS (#14)
+    # ==========================================
+    InseegoSensorEntityDescription(
+        key="imei",
+        name="IMEI",
+        icon="mdi:identifier",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("statusData", {}).get("statusBarIMEI"),
+    ),
+    InseegoSensorEntityDescription(
+        key="mac_address",
+        name="MAC Address",
+        icon="mdi:network",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("statusData", {}).get("statusBarMAC"),
+    ),
+    InseegoSensorEntityDescription(
+        key="serial_number",
+        name="Serial Number",
+        icon="mdi:barcode",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("statusData", {}).get("serialNumber"),
+    ),
+    InseegoSensorEntityDescription(
+        key="iccid",
+        name="ICCID",
+        icon="mdi:sim",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("statusData", {}).get("iccid"),
+    ),
+
+    # ==========================================
+    # UPTIME SENSOR (#16)
+    # ==========================================
+    InseegoSensorEntityDescription(
+        key="uptime",
+        name="Uptime",
+        icon="mdi:timer-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("statusData", {}).get("uptime"),
+    ),
+
+    # ==========================================
     # REST API SENSORS (authenticated — requires password in config)
     # ==========================================
 

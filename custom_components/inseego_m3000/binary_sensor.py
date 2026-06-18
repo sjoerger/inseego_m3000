@@ -81,6 +81,14 @@ def is_guest_wifi_enabled(data: dict) -> bool:
     return bool(enabled)
 
 
+def is_wan_connected(data: dict) -> bool:
+    """Check true WAN connectivity — cellular connected AND a WAN IP assigned."""
+    status_data = data.get("statusData", {})
+    connected = status_data.get("statusBarConnectionState", "").lower() == "connected"
+    wan_ip = status_data.get("internetStatusIPAddress", "")
+    return connected and bool(wan_ip)
+
+
 BINARY_SENSOR_TYPES: tuple[InseegoBinarySensorEntityDescription, ...] = (
     InseegoBinarySensorEntityDescription(
         key="connection",
@@ -134,6 +142,13 @@ BINARY_SENSOR_TYPES: tuple[InseegoBinarySensorEntityDescription, ...] = (
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         icon="mdi:wifi-star",
         value_fn=is_guest_wifi_enabled,
+    ),
+    InseegoBinarySensorEntityDescription(
+        key="wan_connected",
+        name="WAN Connected",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        icon="mdi:earth",
+        value_fn=is_wan_connected,
     ),
 )
 

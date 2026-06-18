@@ -179,6 +179,11 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                 status_url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
             ) as response:
                 if "401lockedout" in str(response.url):
+                    _LOGGER.warning(
+                        "Device at %s is locked out — all requests redirected to lockout page. "
+                        "Wait for lockout to expire or reboot the device.",
+                        self.host,
+                    )
                     raise UpdateFailed(
                         "Device is locked out — wait for lockout to expire or reboot the device"
                     )
@@ -187,6 +192,11 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                 try:
                     status_data = await response.json(content_type=None)
                 except (ValueError, aiohttp.ContentTypeError) as err:
+                    raw = await response.text() if not response.content.at_eof() else "(already read)"
+                    _LOGGER.warning(
+                        "Unexpected response from %s — %s. Body: %.200s",
+                        status_url, err, raw,
+                    )
                     raise UpdateFailed(f"Unexpected response format from device: {err}")
                 if "statusData" not in status_data:
                     raise UpdateFailed("Invalid status response format")
@@ -225,7 +235,13 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
         except UpdateFailed:
             raise
         except TimeoutError:
-            raise UpdateFailed(f"Timeout connecting to {self.host}")
+            raise UpdateFailed(
+                f"Timed out connecting to {self.host} — device may be offline or unreachable"
+            )
+        except aiohttp.ClientConnectorError:
+            raise UpdateFailed(
+                f"Cannot connect to {self.host} — check the IP address and network"
+            )
         except aiohttp.ClientError as err:
             raise UpdateFailed(f"Error communicating with device: {err}")
         except Exception as err:
