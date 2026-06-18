@@ -215,21 +215,35 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             # Fetch REST data (authenticated, skipped if no password configured)
             cellular_status_data = {}
             battery_status_data = {}
+            device_info_data = {}
+            account_info_data = {}
             if self._has_auth:
-                try:
-                    cellular_status_data = await self._rest_get("/rest/1.0/CellularServiceStatus")
-                except Exception as err:
-                    _LOGGER.debug("Cellular REST status: %s", err)
-                try:
-                    battery_status_data = await self._rest_get("/rest/1.0/BatteryStatus")
-                except Exception as err:
-                    _LOGGER.debug("Battery REST status: %s", err)
+                for key, path, target in (
+                    ("cellular", "/rest/1.0/CellularServiceStatus", None),
+                    ("battery",  "/rest/1.0/BatteryStatus",         None),
+                    ("device",   "/rest/1.0/DeviceInfo",            None),
+                    ("account",  "/rest/1.0/AccountInfo",           None),
+                ):
+                    try:
+                        result = await self._rest_get(path)
+                        if key == "cellular":
+                            cellular_status_data = result
+                        elif key == "battery":
+                            battery_status_data = result
+                        elif key == "device":
+                            device_info_data = result
+                        elif key == "account":
+                            account_info_data = result
+                    except Exception as err:
+                        _LOGGER.debug("%s REST fetch failed: %s", key, err)
 
             return {
                 **status_data,
                 "usageData": usage_data,
                 "cellularStatusData": cellular_status_data,
                 "batteryStatusData": battery_status_data,
+                "deviceInfoData": device_info_data,
+                "accountInfoData": account_info_data,
             }
 
         except UpdateFailed:

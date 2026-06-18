@@ -383,7 +383,8 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
     ),
 
     # ==========================================
-    # DEVICE IDENTITY SENSORS (#14)
+    # DEVICE IDENTITY & INFO SENSORS (#14, #15)
+    # — sourced from /rest/1.0/DeviceInfo and /rest/1.0/AccountInfo
     # ==========================================
     InseegoSensorEntityDescription(
         key="imei",
@@ -391,7 +392,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:identifier",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("statusData", {}).get("statusBarIMEI"),
+        value_fn=lambda data: data.get("deviceInfoData", {}).get("DeviceInfoIMEI"),
     ),
     InseegoSensorEntityDescription(
         key="mac_address",
@@ -399,15 +400,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:network",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("statusData", {}).get("statusBarMAC"),
-    ),
-    InseegoSensorEntityDescription(
-        key="serial_number",
-        name="Serial Number",
-        icon="mdi:barcode",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("statusData", {}).get("serialNumber"),
+        value_fn=lambda data: data.get("deviceInfoData", {}).get("DeviceInfoMacAddress"),
     ),
     InseegoSensorEntityDescription(
         key="iccid",
@@ -415,22 +408,39 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:sim",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("statusData", {}).get("iccid"),
+        value_fn=lambda data: data.get("accountInfoData", {}).get("ICCID"),
     ),
-
-    # ==========================================
-    # UPTIME SENSOR (#16)
-    # ==========================================
     InseegoSensorEntityDescription(
-        key="uptime",
-        name="Uptime",
-        icon="mdi:timer-outline",
-        device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement=UnitOfTime.SECONDS,
-        state_class=SensorStateClass.TOTAL_INCREASING,
+        key="mdn",
+        name="MDN",
+        icon="mdi:phone",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: data.get("statusData", {}).get("uptime"),
+        value_fn=lambda data: data.get("accountInfoData", {}).get("MDN"),
+    ),
+    InseegoSensorEntityDescription(
+        key="hw_version",
+        name="Hardware Version",
+        icon="mdi:chip",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("deviceInfoData", {}).get("DeviceInfoHwVersion"),
+    ),
+    InseegoSensorEntityDescription(
+        key="modem_firmware",
+        name="Modem Firmware",
+        icon="mdi:cellphone-arrow-down",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("deviceInfoData", {}).get("DeviceInfoModemFwVersion"),
+    ),
+    InseegoSensorEntityDescription(
+        key="webui_version",
+        name="Web UI Version",
+        icon="mdi:web",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: data.get("deviceInfoData", {}).get("DeviceInfoWebUISwVersion"),
     ),
 
     # ==========================================
