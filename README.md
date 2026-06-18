@@ -35,6 +35,12 @@ A Home Assistant custom integration for monitoring Inseego M3000 portable hotspo
 - Connected clients count
 - SIM and GPS status
 
+### 📍 GPS Location (optional, disabled by default)
+When GPS has a fix, the integration exposes:
+- Latitude, Longitude (°)
+- Altitude (m), Heading (°)
+- Accuracy (m), Satellite count
+
 ### 🔐 Authenticated sensors (optional admin password)
 When an admin password is configured, the integration unlocks additional sensors via the device REST API:
 
@@ -143,6 +149,7 @@ The M3000 will lock out all HTTP access (redirecting to `401lockedout.html`) aft
 - `http://{device_ip}/rest/1.0/BatteryStatus` — charging source and health
 - `http://{device_ip}/rest/1.0/DeviceInfo` — hardware details and firmware versions
 - `http://{device_ip}/rest/1.0/AccountInfo` — SIM identity (ICCID, MDN)
+- `http://{device_ip}/gps/status/` — GPS location (lat, lon, altitude, heading, accuracy, satellites); falls back to `/gps/` or `/srv/gps` if unavailable
 
 ## Contributing
 

@@ -163,6 +163,15 @@ def get_ip_attributes(data: dict) -> dict:
     }
 
 
+def _gps_get(gps: dict, *keys):
+    """Return first non-None value from gps dict across multiple field name candidates."""
+    for k in keys:
+        v = gps.get(k)
+        if v is not None:
+            return v
+    return None
+
+
 SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
     # ==========================================
     # MAIN SENSORS (No category)
@@ -528,6 +537,80 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         icon="mdi:power-plug",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data.get("batteryStatusData", {}).get("BatteryChargingSource"),
+    ),
+
+    # ==========================================
+    # GPS SENSORS (from /gps/status/, /gps/, or /srv/gps)
+    # ==========================================
+    InseegoSensorEntityDescription(
+        key="gps_latitude",
+        name="GPS Latitude",
+        icon="mdi:latitude",
+        native_unit_of_measurement="°",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=6,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
+            "Latitude", "latitude", "gpsStatusLatitude", "lat"),
+    ),
+    InseegoSensorEntityDescription(
+        key="gps_longitude",
+        name="GPS Longitude",
+        icon="mdi:longitude",
+        native_unit_of_measurement="°",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=6,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
+            "Longitude", "longitude", "gpsStatusLongitude", "lon"),
+    ),
+    InseegoSensorEntityDescription(
+        key="gps_accuracy",
+        name="GPS Accuracy",
+        icon="mdi:crosshairs",
+        native_unit_of_measurement="m",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
+            "Accuracy", "accuracy", "gpsStatusUncertainty", "gpsStatusAccuracy"),
+    ),
+    InseegoSensorEntityDescription(
+        key="gps_satellites",
+        name="GPS Satellites",
+        icon="mdi:satellite-variant",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
+            "Satellites", "satellites", "gpsStatusSatelliteCount", "satellite_count"),
+    ),
+    InseegoSensorEntityDescription(
+        key="gps_altitude",
+        name="GPS Altitude",
+        icon="mdi:elevation-rise",
+        native_unit_of_measurement="m",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
+            "Altitude", "altitude", "gpsStatusAltitude"),
+    ),
+    InseegoSensorEntityDescription(
+        key="gps_heading",
+        name="GPS Heading",
+        icon="mdi:compass",
+        native_unit_of_measurement="°",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
+            "Heading", "heading", "gpsStatusHeading"),
     ),
 
 )

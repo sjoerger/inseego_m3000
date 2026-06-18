@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.0.8] - 2026-06-18
+
+### New sensors — GPS location
+Sourced from `/gps/status/` (authenticated) with fallback to `/gps/` and `/srv/gps`:
+- GPS Latitude (°) — disabled by default
+- GPS Longitude (°) — disabled by default
+- GPS Accuracy (m) — disabled by default
+- GPS Altitude (m) — disabled by default
+- GPS Heading (°) — disabled by default
+- GPS Satellites — disabled by default
+
+All GPS sensors are in the diagnostic category and require a GPS fix to report values.
+
 ## [1.0.7] - 2026-06-18
 
 ### Authentication

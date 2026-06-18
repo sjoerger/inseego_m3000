@@ -165,6 +165,35 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             return await resp.json(content_type=None)
 
     # -------------------------------------------------------------------------
+    # GPS fetch (unauthenticated fallback chain)
+    # -------------------------------------------------------------------------
+
+    async def _fetch_gps_data(self) -> dict:
+        """Fetch GPS data: /gps/status/ (auth) → /gps/ → /srv/gps."""
+        if self._has_auth:
+            try:
+                data = await self._rest_get("/gps/status/")
+                _LOGGER.debug("GPS data from /gps/status/")
+                return data
+            except Exception as err:
+                _LOGGER.debug("GPS /gps/status/ failed: %s", err)
+
+        for path in ("/gps/", "/srv/gps"):
+            try:
+                url = f"http://{self.host}{path}"
+                async with self.session.get(
+                    url, timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+                ) as resp:
+                    if resp.status == 200 and "401lockedout" not in str(resp.url):
+                        data = await resp.json(content_type=None)
+                        _LOGGER.debug("GPS data from %s", path)
+                        return data
+            except Exception as err:
+                _LOGGER.debug("GPS %s failed: %s", path, err)
+
+        return {}
+
+    # -------------------------------------------------------------------------
     # Data fetch
     # -------------------------------------------------------------------------
 
@@ -237,6 +266,9 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                     except Exception as err:
                         _LOGGER.debug("%s REST fetch failed: %s", key, err)
 
+            # Fetch GPS data with fallback chain
+            gps_data = await self._fetch_gps_data()
+
             return {
                 **status_data,
                 "usageData": usage_data,
@@ -244,6 +276,7 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
                 "batteryStatusData": battery_status_data,
                 "deviceInfoData": device_info_data,
                 "accountInfoData": account_info_data,
+                "gpsData": gps_data,
             }
 
         except UpdateFailed:
