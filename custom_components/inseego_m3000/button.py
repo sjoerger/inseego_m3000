@@ -1,7 +1,11 @@
 """Button platform for Inseego M3000 Hotspot."""
 from __future__ import annotations
 
+import logging
+
 from homeassistant.components.button import ButtonEntity
+
+_LOGGER = logging.getLogger(__name__)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -46,4 +50,5 @@ class InseegoM3000RebootButton(CoordinatorEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Reboot the device."""
+        _LOGGER.info("%s: rebooting device", self.coordinator.host)
         await self.coordinator._rest_post("/restarting/reboot/")

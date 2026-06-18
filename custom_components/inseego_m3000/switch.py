@@ -1,8 +1,11 @@
 """Switch platform for Inseego M3000 Hotspot."""
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
+
+_LOGGER = logging.getLogger(__name__)
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
@@ -107,10 +110,12 @@ class InseegoM3000Switch(CoordinatorEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the switch on."""
+        _LOGGER.info("%s: turning on %s", self.coordinator.host, self.entity_description.name)
         await self.coordinator._rest_post(self.entity_description.turn_on_path)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the switch off."""
+        _LOGGER.info("%s: turning off %s", self.coordinator.host, self.entity_description.name)
         await self.coordinator._rest_post(self.entity_description.turn_off_path)
         await self.coordinator.async_request_refresh()
