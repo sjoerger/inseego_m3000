@@ -129,7 +129,9 @@ class InseegoM3000Switch(CoordinatorEntity, SwitchEntity):
         """Turn the switch on."""
         _LOGGER.info("%s: turning on %s", self.coordinator.host, self.entity_description.name)
         result = await self.coordinator._rest_post(self.entity_description.turn_on_path)
-        if not _ack_ok(result):
+        if _ack_ok(result):
+            _LOGGER.info("%s: %s on acknowledged", self.coordinator.host, self.entity_description.name)
+        else:
             _LOGGER.warning("%s: no success acknowledgement turning on %s: %s",
                             self.coordinator.host, self.entity_description.name, result)
         await self.coordinator.async_request_refresh()
@@ -138,7 +140,9 @@ class InseegoM3000Switch(CoordinatorEntity, SwitchEntity):
         """Turn the switch off."""
         _LOGGER.info("%s: turning off %s", self.coordinator.host, self.entity_description.name)
         result = await self.coordinator._rest_post(self.entity_description.turn_off_path)
-        if not _ack_ok(result):
+        if _ack_ok(result):
+            _LOGGER.info("%s: %s off acknowledged", self.coordinator.host, self.entity_description.name)
+        else:
             _LOGGER.warning("%s: no success acknowledgement turning off %s: %s",
                             self.coordinator.host, self.entity_description.name, result)
         await self.coordinator.async_request_refresh()
