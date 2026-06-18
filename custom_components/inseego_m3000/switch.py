@@ -26,6 +26,11 @@ class InseegoSwitchEntityDescription(SwitchEntityDescription):
     is_on_fn: Callable[[dict], bool] = None
 
 
+def _ack_ok(result: dict) -> bool:
+    """Return True if the device acknowledged the command successfully."""
+    return bool(result.get("success", result.get("status") == 200))
+
+
 SWITCH_TYPES: tuple[InseegoSwitchEntityDescription, ...] = (
     InseegoSwitchEntityDescription(
         key="wifi",
@@ -111,11 +116,17 @@ class InseegoM3000Switch(CoordinatorEntity, SwitchEntity):
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the switch on."""
         _LOGGER.info("%s: turning on %s", self.coordinator.host, self.entity_description.name)
-        await self.coordinator._rest_post(self.entity_description.turn_on_path)
+        result = await self.coordinator._rest_post(self.entity_description.turn_on_path)
+        if not _ack_ok(result):
+            _LOGGER.warning("%s: no success acknowledgement turning on %s: %s",
+                            self.coordinator.host, self.entity_description.name, result)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the switch off."""
         _LOGGER.info("%s: turning off %s", self.coordinator.host, self.entity_description.name)
-        await self.coordinator._rest_post(self.entity_description.turn_off_path)
+        result = await self.coordinator._rest_post(self.entity_description.turn_off_path)
+        if not _ack_ok(result):
+            _LOGGER.warning("%s: no success acknowledgement turning off %s: %s",
+                            self.coordinator.host, self.entity_description.name, result)
         await self.coordinator.async_request_refresh()

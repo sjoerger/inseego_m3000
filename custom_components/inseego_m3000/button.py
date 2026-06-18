@@ -51,4 +51,7 @@ class InseegoM3000RebootButton(CoordinatorEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Reboot the device."""
         _LOGGER.info("%s: rebooting device", self.coordinator.host)
-        await self.coordinator._rest_post("/restarting/reboot/")
+        result = await self.coordinator._rest_post("/restarting/reboot/")
+        if not result.get("success", result.get("status") == 200):
+            _LOGGER.warning("%s: no success acknowledgement for reboot: %s",
+                            self.coordinator.host, result)
