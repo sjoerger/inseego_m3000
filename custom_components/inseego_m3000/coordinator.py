@@ -147,6 +147,33 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
     # Authenticated REST helper
     # -------------------------------------------------------------------------
 
+    async def _rest_post(self, path: str, data: dict | None = None) -> dict:
+        """POST to an authenticated endpoint with gSecureToken and XHR header."""
+        await self._ensure_authenticated()
+        url = f"http://{self.host}{path}"
+        post_data: dict = {}
+        if self._action_token:
+            post_data["gSecureToken"] = self._action_token
+        if data:
+            post_data.update(data)
+        async with self._auth_session.post(
+            url,
+            data=post_data,
+            headers={"X-Requested-With": "XMLHttpRequest"},
+            timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT),
+        ) as resp:
+            if resp.status == 401:
+                self._authenticated = False
+                _LOGGER.debug("Session expired on POST %s — will re-authenticate next poll", path)
+                raise aiohttp.ClientResponseError(
+                    resp.request_info, resp.history, status=401
+                )
+            resp.raise_for_status()
+            try:
+                return await resp.json(content_type=None)
+            except Exception:
+                return {}
+
     async def _rest_get(self, path: str) -> dict:
         """GET a REST endpoint, re-authenticating once on session expiry (401)."""
         await self._ensure_authenticated()

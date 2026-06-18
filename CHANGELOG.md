@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.6.0] - 2026-06-18
+
+### New switches (requires password)
+- **WiFi** — enable/disable the hotspot's WiFi radio
+- **Mobile Data** — enable/disable cellular data
+- **GPS** — enable/disable the GPS receiver
+- **Ethernet Port** — enable/disable the physical Ethernet port
+
+All switches show as unavailable if no admin password is configured.
+
+### New button (requires password)
+- **Reboot** — restart the device
+
 ## [1.5.0] - 2026-06-18
 
 ### Authentication

@@ -10,9 +10,9 @@ from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import DOMAIN
 from .coordinator import InseegoM3000DataUpdateCoordinator
-from . import sensor, binary_sensor  # pre-import so async_forward_entry_setups doesn't block the event loop
+from . import sensor, binary_sensor, switch, button  # pre-import to avoid blocking the event loop
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH, Platform.BUTTON]
 
 _LOGGER = logging.getLogger(__name__)
 

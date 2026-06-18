@@ -1,0 +1,116 @@
+"""Switch platform for Inseego M3000 Hotspot."""
+from __future__ import annotations
+
+from collections.abc import Callable
+from dataclasses import dataclass, field
+
+from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from .const import DOMAIN
+from .coordinator import InseegoM3000DataUpdateCoordinator
+
+
+@dataclass
+class InseegoSwitchEntityDescription(SwitchEntityDescription):
+    """Describes an Inseego switch entity."""
+
+    turn_on_path: str = ""
+    turn_off_path: str = ""
+    is_on_fn: Callable[[dict], bool] = None
+
+
+SWITCH_TYPES: tuple[InseegoSwitchEntityDescription, ...] = (
+    InseegoSwitchEntityDescription(
+        key="wifi",
+        name="WiFi",
+        icon="mdi:wifi",
+        turn_on_path="/wifigeneral/enablewifi/",
+        turn_off_path="/wifigeneral/disablewifi/",
+        is_on_fn=lambda data: bool(data.get("statusData", {}).get("statusBarWiFiEnabled", 0)),
+    ),
+    InseegoSwitchEntityDescription(
+        key="mobile_data",
+        name="Mobile Data",
+        icon="mdi:signal",
+        turn_on_path="/wwan/enablecellulardata/",
+        turn_off_path="/wwan/disablecellulardata/",
+        is_on_fn=lambda data: bool(data.get("statusData", {}).get("statusBarMobileDataEnabled", 0)),
+    ),
+    InseegoSwitchEntityDescription(
+        key="gps_enabled",
+        name="GPS",
+        icon="mdi:crosshairs-gps",
+        turn_on_path="/gps/enablegps/",
+        turn_off_path="/gps/disablegps/",
+        is_on_fn=lambda data: not data.get("gpsData", {}).get("gpsIsOff", True),
+    ),
+    InseegoSwitchEntityDescription(
+        key="ethernet_port",
+        name="Ethernet Port",
+        icon="mdi:ethernet",
+        turn_on_path="/preferences/displayethernetenable/",
+        turn_off_path="/preferences/displayethernetdisable/",
+        is_on_fn=lambda data: data.get("statusData", {}).get(
+            "statusBarEthernetPortEnabled", ""
+        ) not in ("", "disabled", "0", 0),
+    ),
+)
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up Inseego M3000 switches from a config entry."""
+    coordinator: InseegoM3000DataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities(
+        InseegoM3000Switch(coordinator, description) for description in SWITCH_TYPES
+    )
+
+
+class InseegoM3000Switch(CoordinatorEntity, SwitchEntity):
+    """Representation of an Inseego M3000 switch."""
+
+    entity_description: InseegoSwitchEntityDescription
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: InseegoM3000DataUpdateCoordinator,
+        description: InseegoSwitchEntityDescription,
+    ) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{coordinator.host}_{description.key}"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, coordinator.host)},
+            "name": f"Inseego M3000 ({coordinator.host})",
+            "manufacturer": "Inseego",
+            "model": "M3000",
+        }
+
+    @property
+    def available(self) -> bool:
+        """Switches require authentication."""
+        return super().available and self.coordinator._has_auth
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if the switch is on."""
+        return self.entity_description.is_on_fn(self.coordinator.data)
+
+    async def async_turn_on(self, **kwargs) -> None:
+        """Turn the switch on."""
+        await self.coordinator._rest_post(self.entity_description.turn_on_path)
+        await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs) -> None:
+        """Turn the switch off."""
+        await self.coordinator._rest_post(self.entity_description.turn_off_path)
+        await self.coordinator.async_request_refresh()
