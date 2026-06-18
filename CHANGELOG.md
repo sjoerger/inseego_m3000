@@ -1,6 +1,41 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.0.7] - 2026-06-18
+
+### Authentication
+- Added optional admin password field to the setup flow
+- Implements the M3000 bcrypt login flow (pure Python, no FFI dependency) to establish an authenticated session
+- Without a password the integration behaves exactly as before; with a password the REST API sensors are unlocked
+
+### New sensors (requires password)
+**Cellular signal (from `/rest/1.0/CellularServiceStatus`):**
+- Signal Strength (RSRP, dBm)
+- Signal Quality (RSRQ, dB) — disabled by default
+- Signal to Noise (SINR, dB) — disabled by default
+- Active Band (e.g. n25, n41)
+- Roaming State
+- 5G Bandwidth (MHz) — disabled by default
+- Cell ID — disabled by default
+- Physical Cell ID (PCI) — disabled by default
+
+**Battery (from `/rest/1.0/BatteryStatus`):**
+- Battery Charging Source (e.g. WallCharger)
+
+**Device identity (from `/rest/1.0/DeviceInfo` and `/rest/1.0/AccountInfo`):**
+- IMEI, MAC Address, ICCID, MDN — all disabled by default
+- Hardware Version, Modem Firmware, Web UI Version — all disabled by default
+
+### New binary sensor
+- WAN Connected — true internet connectivity check combining cellular connection state AND presence of a WAN IP address; distinct from the existing Connection sensor
+
+### Reliability improvements
+- Lockout detection now logs at WARNING level with an actionable message
+- Timeout errors and connection refused errors now produce distinct log messages
+- Raw response body logged on JSON parse failure to aid diagnosis
+- Fixed blocking event loop warning on newer HA versions (Python 3.14)
+- Session expiry handled gracefully — REST sensors miss one poll then recover automatically
+
 ## [1.0.6] - 2026-06-18
 - Detect device lockout: if the hotspot redirects requests to `401lockedout.html` (triggered by too many bad password attempts), the integration now raises a clear error instead of silently failing
 

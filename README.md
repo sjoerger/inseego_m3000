@@ -11,13 +11,11 @@ A Home Assistant custom integration for monitoring Inseego M3000 portable hotspo
 
 ## Features
 
-Monitor your Inseego M3000 hotspot with 24 sensors and 8 binary sensors including:
-
-
 ### 📡 Connection & Signal
 - Signal strength (bars and SNR)
 - Network provider and technology (4G/5G/5G UWB)
 - Connection state and duration
+- WAN connectivity (true internet check — connected state + WAN IP)
 - IP address information
 
 ### 📊 Data Usage
@@ -32,10 +30,21 @@ Monitor your Inseego M3000 hotspot with 24 sensors and 8 binary sensors includin
 - Cycle end date
 
 ### 🔋 Device Status
-- Battery percentage and charging status
+- Battery percentage, charging status, and charging source
 - WiFi, mobile data, and ethernet status
 - Connected clients count
 - SIM and GPS status
+
+### 🔐 Authenticated sensors (optional admin password)
+When an admin password is configured, the integration unlocks additional sensors via the device REST API:
+
+**Cellular signal detail:**
+- RSRP (dBm), RSRQ (dB), SINR (dB)
+- Active band, roaming state, 5G bandwidth, Cell ID, PCI
+
+**Device identity (diagnostic):**
+- IMEI, MAC address, ICCID, MDN
+- Hardware version, modem firmware, web UI version
 
 ## Installation
 
@@ -63,8 +72,11 @@ One-click installation from HACS:
 2. Click **+ Add Integration**
 3. Search for "Inseego M3000"
 4. Enter your hotspot's IP address (usually `192.168.1.1`)
-5. Optionally adjust the update interval (default: 30 seconds)
-6. Click Submit
+5. Optionally enter your admin password to enable REST API sensors
+6. Optionally adjust the update interval (default: 30 seconds)
+7. Click Submit
+
+The admin password is the same password used to log in to the hotspot's web UI. It is stored securely in Home Assistant's config entry storage. Without a password the integration works normally with unauthenticated endpoints only.
 
 ## Documentation
 
@@ -122,11 +134,15 @@ The M3000 will lock out all HTTP access (redirecting to `401lockedout.html`) aft
 
 ## API Information
 
-This integration uses the following REST API endpoints:
-- `http://{device_ip}/srv/status` - Device and connection status
-- `http://{device_ip}/apps_home/usageinfo` - Billing cycle data
+**Unauthenticated endpoints (always polled):**
+- `http://{device_ip}/srv/status` — device and connection status
+- `http://{device_ip}/apps_home/usageinfo` — billing cycle data
 
-No authentication is required for local network access.
+**Authenticated endpoints (polled when password is configured):**
+- `http://{device_ip}/rest/1.0/CellularServiceStatus` — detailed signal metrics
+- `http://{device_ip}/rest/1.0/BatteryStatus` — charging source and health
+- `http://{device_ip}/rest/1.0/DeviceInfo` — hardware details and firmware versions
+- `http://{device_ip}/rest/1.0/AccountInfo` — SIM identity (ICCID, MDN)
 
 ## Contributing
 
