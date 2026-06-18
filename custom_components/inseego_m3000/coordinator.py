@@ -68,23 +68,10 @@ class InseegoM3000DataUpdateCoordinator(DataUpdateCoordinator):
             except Exception as err:
                 _LOGGER.debug("Usage data not available: %s", err)
 
-            # Fetch cellular REST status (richer signal data than /srv/status)
-            cellular_status_data = {}
-            try:
-                async with self.session.get(
-                    f"http://{self.host}/rest/1.0/CellularServiceStatus",
-                    timeout=aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT),
-                ) as response:
-                    if response.status == 200 and "401lockedout" not in str(response.url):
-                        cellular_status_data = await response.json(content_type=None)
-            except Exception as err:
-                _LOGGER.debug("Cellular REST status not available: %s", err)
-
             # Combine all datasets
             return {
                 **status_data,
                 "usageData": usage_data,
-                "cellularStatusData": cellular_status_data,
             }
                 
         except TimeoutError:
