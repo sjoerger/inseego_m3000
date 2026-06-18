@@ -17,9 +17,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS,
-    SIGNAL_STRENGTH_DECIBELS_MILLIWATTS,
     UnitOfDataRate,
-    UnitOfFrequency,
     UnitOfInformation,
     UnitOfTime,
 )
@@ -392,7 +390,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         name="Signal Strength (RSRP)",
         icon="mdi:signal",
         device_class=SensorDeviceClass.SIGNAL_STRENGTH,
-        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATTS,
+        native_unit_of_measurement="dBm",
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data.get("cellularStatusData", {}).get("CurrentSignalStrengthInRSRP"),
@@ -437,7 +435,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         key="bandwidth_5g",
         name="5G Bandwidth",
         icon="mdi:speedometer",
-        native_unit_of_measurement=UnitOfFrequency.MEGAHERTZ,
+        native_unit_of_measurement="MHz",
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
