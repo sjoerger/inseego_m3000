@@ -172,6 +172,40 @@ def _gps_get(gps: dict, *keys):
     return None
 
 
+def _parse_gps_altitude(data: dict) -> float | None:
+    """Return altitude in metres, handling device-reported strings like '195 ft'."""
+    raw = _gps_get(data.get("gpsData", {}), "Altitude", "altitude", "gpsStatusAltitude")
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = str(raw).strip()
+    if s.lower().endswith(" ft"):
+        try:
+            return round(float(s[:-3].strip()) * 0.3048, 1)
+        except (ValueError, TypeError):
+            return None
+    s = s.rstrip(" m").strip()
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return None
+
+
+def _parse_gps_heading(data: dict) -> float | None:
+    """Return heading in degrees, stripping any unit suffix."""
+    raw = _gps_get(data.get("gpsData", {}), "Heading", "heading", "gpsStatusHeading")
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = str(raw).strip().rstrip("°").rstrip(" deg").strip()
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return None
+
+
 SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
     # ==========================================
     # MAIN SENSORS (No category)
@@ -597,8 +631,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         suggested_display_precision=1,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
-            "Altitude", "altitude", "gpsStatusAltitude"),
+        value_fn=_parse_gps_altitude,
     ),
     InseegoSensorEntityDescription(
         key="gps_heading",
@@ -609,8 +642,7 @@ SENSOR_TYPES: tuple[InseegoSensorEntityDescription, ...] = (
         suggested_display_precision=1,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: _gps_get(data.get("gpsData", {}),
-            "Heading", "heading", "gpsStatusHeading"),
+        value_fn=_parse_gps_heading,
     ),
 
 )
